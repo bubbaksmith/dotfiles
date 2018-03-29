@@ -10,6 +10,7 @@ alias ...='cd ../..'
 alias ....='cd ../../..'
 alias .....='cd ../../../..'
 alias path='echo -e ${PATH//:/\\n}'
+alias pw='echo T03kmZg27Vdx8iOW'
 alias r='rake'
 alias cpu='top -o cpu'
 alias mem='top -o rsize'
@@ -24,6 +25,8 @@ alias lata="echo $1"
 #alias d='puma -b "ssl://0.0.0.0:9898?key=../localhost.salesloft.com.key&cert=../localhost.salesloft.com.crt&verify_mode=none"'
 #alias dd='puma -b "ssl://0.0.0.0:9898?key=/Users/briansmith/src/localhost.salesloft.com.key&cert=/Users/briansmith/src/localhost.salesloft.com.crt&verify_mode=none"'
 
+source /Users/briansmith/.secrets
+
 alias gb='git branch'
 alias gca='rubocop_if_melody; git commit -a'
 alias gst='git status -uno'
@@ -35,6 +38,7 @@ alias stop_mysql='sudo launchctl unload -F /Library/LaunchDaemons/com.oracle.oss
 alias rbash=". ~/.bash_profile"
 
 alias melody="cd ~/src/melody && bundle install && bundle exec foreman start"
+alias update_mel="cd ~/src/melody && npm run clean && npm install && bundle install && bin/rake db:migrate RAILS_ENV=test && bin/rake db:migrate RAILS_ENV=development"
 
 rubocop_if_melody () {
     [[ "$PWD" =~ melody ]] && rubocop -a
@@ -48,8 +52,8 @@ alias mypack_root='ssh root@107.170.30.9'
 alias briansmith.io='ssh rails@162.243.31.85'
 alias briansmith.io_root='ssh root@162.243.31.85'
 
-export CLICOLOR=1
 export GREP_OPTIONS='--color=auto'
+export LS_COLORS='on'
 
 MYSQL=/usr/local/mysql/bin
 export PATH=$PATH:$MYSQL
@@ -80,99 +84,46 @@ parse_git_branch() {
 docker_exec(){ docker exec -ti $(docker ps | grep $1 |cut -d' ' -f 1) bash; }
 alias de='docker_exec'
 
-kube_exec(){ kubectl exec -ti $(kubectl get pods | grep $1 |cut -d' ' -f 1) /bin/bash; }
-alias ke='kube_exec'
+export HYDRA_GITHUB_TOKEN='83df407186a456b731d7c2f80c0301a341b5ea4a'
 
-kube_delete(){ kubectl delete pod $(kubectl get pods | grep $1 |cut -d' ' -f 1); }
-alias kd='kube_delete'
-
-function kubelogs() {
-  if [ -z "$1" ]
-    then
-      echo "You must include a service name as an argument"
-      return 1
-    else
-      POD=$(kubectl get pods | grep $1 | grep Running | head -1 | awk {'print $1'})
-      if [ -z "$POD" ]
-        then
-          echo "No matching pod found"
-          return 1
-        else
-          kubectl logs $POD $2
-      fi
+alias kpw='watch kubectl get pods -n hydra2'
+alias kp='k get pods -n hydra2'
+alias kbp='kube_build_push && kube_command delete && watch kubectl get pods -n hydra2'
+alias ke='kube_command exec_into'
+alias kc='kubectl config use-context'
+alias kd='kube_command delete && watch kubectl get pods -n hydra2'
+alias kl='kube_command log'
+function kube_build_push() {
+  docker build . -t registry.qasalesloft.com/hydra2:latest
+  docker push registry.qasalesloft.com/hydra2:latest
+}
+function hydra_pod() {
+  kubectl get pods -n hydra2 | grep hydra2-[0-9] | head -1 | awk {'print $1'}
+}
+function kube_command() {
+  POD=$(hydra_pod)
+  if [ -z "$POD" ]; then
+    echo "No matching pod found" && return 1
+  else
+    case "$1" in
+      "exec_into" )
+        kubectl exec -it -n hydra2 $POD /bin/bash || kubectl exec -it $POD /bin/sh ;;
+      "delete" )
+        kubectl delete pod -n hydra2 $POD ;;
+      "log" )
+        kubectl log -n hydra2 $POD -f ;;
+      * )
+        echo "You have failed to match anything" ;;
+    esac
   fi
 }
-alias kl='kubelogs' 
-alias kp='k get pods'
+
 source /opt/boxen/env.sh
 
+export AWSSH_BASTION_HOST='omni1.salesloft.com'
+export AWSSH_USERNAME='briansmith'
+export AWSSH_ACCESS_KEY_ID='AKIAIQ6PG3HOZOPBDBFQ'
+export AWSSH_SECRET_ACCESS_KEY='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'
+
 export PATH=/usr/local/Homebrew/opt/imagemagick@6/bin:/Users/briansmith/Downloads:$PATH
-
-function kubeshell() {
-  if [ -z "$1" ]
-    then
-      echo "You must include a service name as an argument"
-      return 1
-    else
-      POD=$(kubectl get pods | grep ${1}-[0-9] | grep Running | head -1 | awk {'print $1'})
-      if [ -z "$POD" ]
-        then
-          echo "No matching pod found"
-          return 1
-        else
-          kubectl exec -it $POD /bin/bash || kubectl exec -it $POD /bin/sh
-      fi
-  fi
-}
-
-
-function kubeexec() {
-  if [ -z "$1" ] || [ -z "$2" ]
-    then
-      echo "You must include a service name and a command as arguments"
-      return 1
-    else
-      POD=$(kubectl get pods | grep ${1}-[0-9] | grep Running | head -1 | awk {'print $1'})
-      if [ -z "$POD" ]
-        then
-          echo "No matching pod found"
-          return 1
-        else
-          kubectl exec $POD $2
-      fi
-  fi
-}
-
-function kubelogs() {
-  if [ -z "$1" ]
-    then
-      echo "You must include a service name as an argument"
-      return 1
-    else
-      POD=$(kubectl get pods | grep ${1}-[0-9] | grep Running | head -1 | awk {'print $1'})
-      if [ -z "$POD" ]
-        then
-          echo "No matching pod found"
-          return 1
-        else
-          kubectl logs $POD $2
-      fi
-  fi
-}
-
-function kubekill() {
-  if [ -z "$1" ]
-    then
-      echo "You must include a service name as an argument"
-      return 1
-    else
-      kubectl get pods | grep ${1}-[0-9] | awk {'print $1'} | xargs kubectl delete pod
-  fi
-}
-
-source /Users/briansmith/src/awssh/setup.bash
-function kpods() {
-  kubectl get pods | grep ${1}-[0-9] | awk {'print $1'}
-}
-
 #if [[ $TMUX ]]; then source ~/.tmux-git/tmux-git.sh; fi
