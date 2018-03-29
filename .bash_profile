@@ -86,8 +86,6 @@ parse_git_branch() {
 docker_exec(){ docker exec -ti $(docker ps | grep $1 |cut -d' ' -f 1) bash; }
 alias de='docker_exec'
 
-export HYDRA_GITHUB_TOKEN='83df407186a456b731d7c2f80c0301a341b5ea4a'
-
 alias kpw='watch kubectl get pods -n hydra2'
 alias kp='k get pods -n hydra2'
 alias kbp='kube_build_push && kube_command delete && watch kubectl get pods -n hydra2'
