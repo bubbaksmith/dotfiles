@@ -1,3 +1,5 @@
+source ~/.secrets
+
 alias ll="ls -lhFG"
 alias ls="ls -FG"
 alias la='ls -laG'
@@ -119,11 +121,6 @@ function kube_command() {
 }
 
 source /opt/boxen/env.sh
-
-export AWSSH_BASTION_HOST='omni1.salesloft.com'
-export AWSSH_USERNAME='briansmith'
-export AWSSH_ACCESS_KEY_ID='AKIAIQ6PG3HOZOPBDBFQ'
-export AWSSH_SECRET_ACCESS_KEY='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'
 
 export PATH=/usr/local/Homebrew/opt/imagemagick@6/bin:/Users/briansmith/Downloads:$PATH
 #if [[ $TMUX ]]; then source ~/.tmux-git/tmux-git.sh; fi
