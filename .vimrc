@@ -12,6 +12,8 @@ Plugin 'tarekbecker/vim-yaml-formatter'
 Plugin 'scrooloose/nerdcommenter'
 Plugin 'nathanaelkane/vim-indent-guides'
 Plugin 'thoughtbot/vim-rspec'
+Plugin 'mileszs/ack.vim'
+Plugin 'tpope/vim-endwise'
 
 " " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -26,7 +28,7 @@ filetype plugin indent on    " require"
 " " see :h vundle for more details or wiki for FAQ
 " " Put your non-Plugin stuff after this line
 
-" Trackpad Scrolling
+ "Trackpad Scrolling
 set mouse=a
 
 " VIM AIRLINE 
@@ -41,6 +43,12 @@ let mapleader = ","
 nmap <leader>ne :NERDTree<cr>
 nmap <leader>n :NERDTreeFind<CR>
 nmap <leader>m :NERDTreeToggle<CR>
+
+" fzf
+set rtp+=/usr/local/opt/fzf
+nmap ; :Buffers<CR>
+nmap <Leader>t :Files<CR>
+nmap <Leader>r :Tags<CR>
 
 set number
 execute pathogen#infect()
@@ -84,4 +92,60 @@ set autoindent
 set hlsearch
 set ruler
 set showmatch
+
+
+set linebreak               " Break long lines by word, not char
+"set list                    " Show whitespace as special chars - see listchars
+set matchtime=2             " Tenths of second to hilight matching paren
+
+"silent! set mouse=nvc       " Use the mouse, but not in insert mode
+set scrolloff=10            " Keep cursor away from this many chars top/bot
+
+set shiftround              " Shift to certain columns, not just n spaces
+set shiftwidth=2            " Number of spaces to shift for autoindent or >,<
+set shortmess+=A            " Don't bother me when a swapfile exists
+
+" Trim spaces at EOL and retab. I run `:CLEAN` a lot to clean up files.
+command! TEOL %s/\s\+$//
+command! CLEAN retab | TEOL
+
 endtry
+
+" FZF color scheme updater from https://github.com/junegunn/fzf.vim/issues/59
+function! s:update_fzf_colors()
+  let rules =
+        \ { 'fg':      [['Normal',       'fg']],
+        \ 'bg':      [['Normal',       'bg']],
+        \ 'hl':      [['String',       'fg']],
+        \ 'fg+':     [['CursorColumn', 'fg'], ['Normal', 'fg']],
+        \ 'bg+':     [['CursorColumn', 'bg']],
+        \ 'hl+':     [['String',       'fg']],
+        \ 'info':    [['PreProc',      'fg']],
+        \ 'prompt':  [['Conditional',  'fg']],
+        \ 'pointer': [['Exception',    'fg']],
+        \ 'marker':  [['Keyword',      'fg']],
+        \ 'spinner': [['Label',        'fg']],
+        \ 'header':  [['Comment',      'fg']] }
+  let cols = []
+  for [name, pairs] in items(rules)
+    for pair in pairs
+      let code = synIDattr(synIDtrans(hlID(pair[0])), pair[1])
+      if !empty(name) && code != ''
+        call add(cols, name.':'.code)
+        break
+      endif
+    endfor
+  endfor
+  let s:orig_fzf_default_opts = get(s:, 'orig_fzf_default_opts', $FZF_DEFAULT_OPTS)
+  let $FZF_DEFAULT_OPTS = s:orig_fzf_default_opts .
+        \ (empty(cols) ? '' : (' --color='.join(cols, ',')))
+endfunction
+
+augroup _fzf
+  autocmd!
+  autocmd VimEnter,ColorScheme * call <sid>update_fzf_colors()
+augroup END
+
+if executable('ag')
+  let g:ackprg = 'ag --vimgrep'
+endif
