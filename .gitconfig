@@ -1,49 +1,49 @@
 [user]
-	name = Brian Smith
+  name = Brian Smith
 [core]
-	editor = vim
-	whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
-	excludesfile = ~/.gitignore
+  editor = vim
+  whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
+  excludesfile = ~/.gitignore
 [sendemail]
-	smtpencryption = tls
-	smtpserver = smtp.gmail.com
-	smtpuser = pavan.sss1991@gmail.com
-	smtppass = password
-	smtpserverport = 587
+  smtpencryption = tls
+  smtpserver = smtp.gmail.com
+  smtpuser = pavan.sss1991@gmail.com
+  smtppass = password
+  smtpserverport = 587
 [web]
-	browser = google-chrome
+  browser = google-chrome
 [instaweb]
-	httpd = apache2 -f
+  httpd = apache2 -f
 [push]
-	default = simple
+  default = simple
 [color]
-	ui = auto
+  ui = auto
 [color "branch"]
-	current = yellow bold
-	local = green bold
-	remote = cyan bold
+  current = yellow bold
+  local = green bold
+  remote = cyan bold
 [color "diff"]
-	meta = yellow bold
-	frag = magenta bold
-	old = red bold
-	new = green bold
-	whitespace = red reverse
+  meta = yellow bold
+  frag = magenta bold
+  old = red bold
+  new = green bold
+  whitespace = red reverse
 [color "status"]
-	added = green
-	changed = yellow
-	untracked = cyan
+  added = green
+  changed = yellow
+  untracked = cyan
 
 [difftool "diffmerge"]
-	cmd = "diffmerge.sh \"$LOCAL\" \"$REMOTE\""
-	prompt = false
-	trustExitCode = false
+  cmd = "diffmerge.sh \"$LOCAL\" \"$REMOTE\""
+  prompt = false
+  trustExitCode = false
 [difftool]
   prompt = false
 [merge]
-	tool = diffmerge
+  tool = diffmerge
 [mergetool "diffmerge"]
-	cmd = "diffmerge" --merge --result=$MERGED $LOCAL $BASE $REMOTE
-	trustExitCode = false
+  cmd = "diffmerge" --merge --result=$MERGED $LOCAL $BASE $REMOTE
+  trustExitCode = false
 [alias]
   lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
   co = checkout
@@ -51,8 +51,8 @@
   find-merge = "!sh -c 'commit=$0 && branch=${1:-HEAD} && (git rev-list $commit..$branch --ancestry-path | cat -n; git rev-list $commit..$branch --first-parent | cat -n) | sort -k2 -s | uniq -f1 -d | sort -n | tail -1 | cut -f2'"
   show-merge = "!sh -c 'merge=$(git find-merge $0 $1) && [ -n \"$merge\" ] && git show $merge'"
 [hub]
-protocol = https
+  protocol = https
 [core]
-excludesfile = /opt/boxen/config/git/gitignore
+  excludesfile = /opt/boxen/config/git/gitignore
 [grep]
-	lineNumber = true
+  lineNumber = true
