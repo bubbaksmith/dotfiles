@@ -1,4 +1,5 @@
 source /opt/boxen/env.sh
+source ~/.salesloft
 source ~/.secrets
 #source ~/.k8s_qa_commands
 source ~/.k8s_hydra2_commands
@@ -43,11 +44,6 @@ alias ber='bundle exec rake'
 alias bes='bundle exec foreman start'
 alias rs='bundle exec rspec --format documentation --default-path regression_specs'
 alias rst='bundle exec rspec --format documentation --default-path regression_specs -t'
-
-# SalesLoft
-alias omni="ssh-agent && ssh-add ~/.ssh/id_rsa; ssh -A briansmith@omni1.salesloft.com"
-alias melody="cd ~/src/melody && bundle install && bundle exec foreman start"
-alias update_mel="cd ~/src/melody && npm install && npm run build && bundle install && bin/rake db:migrate RAILS_ENV=test"
 
 # Git
 alias gb='git branch'
