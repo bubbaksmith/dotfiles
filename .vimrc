@@ -13,7 +13,7 @@ Plugin 'scrooloose/nerdcommenter'
 Plugin 'nathanaelkane/vim-indent-guides'
 Plugin 'thoughtbot/vim-rspec'
 Plugin 'mileszs/ack.vim'
-Plugin 'tpope/vim-endwise'
+Plugin 'ryanoasis/vim-devicons'
 
 " " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -27,6 +27,13 @@ filetype plugin indent on    " require"
 " "
 " " see :h vundle for more details or wiki for FAQ
 " " Put your non-Plugin stuff after this line
+
+" open a NERDTree automatically when vim starts up if no files were specified
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+
+" whether or not to show the nerdtree brackets around flags
+let g:webdevicons_conceal_nerdtree_brackets = 1
 
  "Trackpad Scrolling
 set mouse=a
@@ -76,41 +83,6 @@ let g:vim_pbcopy_local_cmd = "pbcopy"
  map <Leader>a :call RunAllSpecs()<CR>
  let g:rspec_command = "bundle exec rspec --default-path regression_specs --format d {spec}"
 
-try
-source ~/.vim_runtime/my_configs.vim
-catch
-
-set encoding=utf-8
-
-" 2 space tabs
-set tabstop=2
-set shiftwidth=2
-set softtabstop=2
-set expandtab
-set autoindent
-
-set hlsearch
-set ruler
-set showmatch
-
-
-set linebreak               " Break long lines by word, not char
-"set list                    " Show whitespace as special chars - see listchars
-set matchtime=2             " Tenths of second to hilight matching paren
-
-"silent! set mouse=nvc       " Use the mouse, but not in insert mode
-set scrolloff=10            " Keep cursor away from this many chars top/bot
-
-set shiftround              " Shift to certain columns, not just n spaces
-set shiftwidth=2            " Number of spaces to shift for autoindent or >,<
-set shortmess+=A            " Don't bother me when a swapfile exists
-
-" Trim spaces at EOL and retab. I run `:CLEAN` a lot to clean up files.
-command! TEOL %s/\s\+$//
-command! CLEAN retab | TEOL
-
-endtry
-
 " FZF color scheme updater from https://github.com/junegunn/fzf.vim/issues/59
 function! s:update_fzf_colors()
   let rules =
@@ -149,3 +121,34 @@ augroup END
 if executable('ag')
   let g:ackprg = 'ag --vimgrep'
 endif
+
+
+set encoding=utf-8
+
+" 2 space tabs
+set tabstop=2
+set shiftwidth=2
+set softtabstop=2
+set expandtab
+set autoindent
+set smarttab
+
+set hlsearch
+set ruler
+set showmatch
+
+set linebreak               " Break long lines by word, not char
+"set list                    " Show whitespace as special chars - see listchars
+set matchtime=2             " Tenths of second to hilight matching paren
+
+"silent! set mouse=nvc       " Use the mouse, but not in insert mode
+set scrolloff=10            " Keep cursor away from this many chars top/bot
+
+set shiftround              " Shift to certain columns, not just n spaces
+set shortmess+=A            " Don't bother me when a swapfile exists
+
+" Trim spaces at EOL and retab. I run `:CLEAN` a lot to clean up files.
+command! TEOL %s/\s\+$//
+command! CLEAN retab | TEOL
+command! VO ! vim $(fzf)
+
