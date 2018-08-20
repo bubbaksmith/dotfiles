@@ -1,0 +1,65 @@
+#!/bin/bash
+
+alias kpw='watch_pods'
+function watch_pods() {
+  if [ -z "$1" ]; then
+    watch kubectl get pods -a
+  else
+    watch "kubectl get pods -a | grep $1"
+  fi
+}
+alias kp='get_pods'
+function get_pods() {
+  if [ -z "$1" ]; then
+    kubectl get pods -a
+  else
+    kubectl get pods -a | grep $1
+  fi
+}
+alias k="kubectl"
+alias kbp='kube_build_push'
+alias ke='kube_command exec_into'
+alias kc='kubectl config use-context'
+alias kd='k describe'
+alias kdel='kube_command delete'
+alias kl='kube_command log'
+
+##############################################################
+#  Build/Push
+#############################################################
+# - This will take the current directory you are running this 
+#   command and use that directory name as the app name
+# - There is one optional parameter that will default to 'latest'
+#
+# Examples:
+#  - kbp
+#  - kpb $(git rev-parse HEAD)
+#  - kbp prod
+##############################################################
+
+function kube_build_push() {
+  docker build . -t registry.qasalesloft.com/hydra2:${1:-latest}
+  docker push registry.qasalesloft.com/hydra2:${1:-latest}
+  kube_command delete
+  watch_pods hydra2
+}
+function hydra_pod() {
+  kubectl get pods | grep hydra2- | head -1 | awk {'print $1'}
+}
+function kube_command() {
+  POD=$(hydra_pod)
+  if [ -z "$POD" ]; then
+    echo "No matching pod found" && return 1
+  else
+    case "$1" in
+      "exec_into" )
+        kubectl exec -it $POD /bin/bash || kubectl exec -it $POD /bin/sh ;;
+      "delete" )
+        kubectl delete pod $POD;;
+      "log" )
+        kubectl log $POD -f ;;
+      * )
+        echo "You have failed to match anything" ;;
+    esac
+  fi
+}
