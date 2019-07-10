@@ -1,0 +1,4 @@
+.unencrypted
+.env
+.tmp
+.cache

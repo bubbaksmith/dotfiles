@@ -1,5 +1,7 @@
 #!/bin/bash
 
+yes | cp -rf ~/.gitignore ~/src/dotfiles/.gitignore
+
 yes | cp -rf ~/.bash_profile ~/src/dotfiles/.bash_profile
 yes | cp -rf ~/.bashrc ~/src/dotfiles/.bashrc
 yes | cp -rf ~/.gitconfig ~/src/dotfiles/.gitconfig
