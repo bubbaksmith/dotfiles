@@ -1,2 +1,0 @@
-#! /bin/bash
-cat $HOME/.kube/config | grep "current-context:" | sed "s/current-context: //"
