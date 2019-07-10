@@ -1,19 +1,37 @@
 set nocompatible              " be iMproved, required
 filetype off                  " required
 
-" set the runtime path to include Vundle and initialize
+set laststatus=0
+
+" set the runtime path to include Vundle and initialie
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 
+Plugin 'dikiaap/minimalist'
 Plugin 'VundleVim/Vundle.vim'
 Plugin 'tpope/vim-fugitive'
 Plugin 'slashmili/alchemist.vim'
-Plugin 'tarekbecker/vim-yaml-formatter'
+"Plugin 'tarekbecker/vim-yaml-formatter'
+Plugin 'mrk21/yaml-vim'
 Plugin 'scrooloose/nerdcommenter'
 Plugin 'nathanaelkane/vim-indent-guides'
-Plugin 'thoughtbot/vim-rspec'
 Plugin 'mileszs/ack.vim'
 Plugin 'ryanoasis/vim-devicons'
+Plugin 'tiagofumo/vim-nerdtree-syntax-highlight'
+Plugin 'christoomey/vim-conflicted'
+Plugin 'mhinz/vim-mix-format'
+Plugin 'scrooloose/nerdtree'
+Plugin 'vim-python/python-syntax'
+"Plugin 'ajh17/VimCompletesMe'
+Plugin 'Valloric/YouCompleteMe'
+Plugin 'vim-syntastic/syntastic'
+Plugin 'kien/ctrlp.vim'
+
+" Python
+Plugin 'vim-scripts/indentpython.vim'
+Plugin 'nvie/vim-flake8'
+
+
 
 " " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -32,19 +50,55 @@ filetype plugin indent on    " require"
 autocmd StdinReadPre * let s:std_in=1
 autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
 
-" whether or not to show the nerdtree brackets around flags
-let g:webdevicons_conceal_nerdtree_brackets = 1
+" NerdTree show Hidden Files
+let NERDTreeShowHidden=1
 
- "Trackpad Scrolling
+" clipboard
+set clipboard=unnamed
+
+" whether or not to show the nerdtree brackets around flags
+let g:webdevicons_conceal_nerdtree_brackets = 0
+
+" after a re-source, fix syntax matching issues (concealing brackets):
+if exists('g:loaded_webdevicons')
+  call webdevicons#refresh()
+endif
+
+" quit NerdTree if its the last tab
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+
+" creates directories when trying to save files in directories that dont exist
+function s:MkNonExDir(file, buf)
+  if empty(getbufvar(a:buf, '&buftype')) && a:file!~#'\v^\w+\:\/'
+    let dir=fnamemodify(a:file, ':h')
+    if !isdirectory(dir)
+      call mkdir(dir, 'p')
+    endif
+  endif
+endfunction
+augroup BWCCreateDir
+  autocmd!
+  autocmd BufWritePre * :call s:MkNonExDir(expand('<afile>'), +expand('<abuf>'))
+augroup END
+
+"Trackpad Scrolling
 set mouse=a
 
-" VIM AIRLINE 
-set runtimepath+=~/.vim_runtime
+" MultiCursor setting of values
+let g:multi_cursor_use_default_mapping=0
+let g:multi_cursor_start_word_key      = '<C-n>'
+let g:multi_cursor_select_all_word_key = '<A-n>'
+let g:multi_cursor_start_key           = 'g<C-n>'
+let g:multi_cursor_select_all_key      = 'g<A-n>'
+let g:multi_cursor_next_key            = '<C-n>'
+let g:multi_cursor_prev_key            = '<C-p>'
+let g:multi_cursor_skip_key            = '<C-x>'
+let g:multi_cursor_quit_key            = '<Esc>'
 
-source ~/.vim_runtime/vimrcs/basic.vim
-source ~/.vim_runtime/vimrcs/filetypes.vim
-source ~/.vim_runtime/vimrcs/plugins_config.vim
-source ~/.vim_runtime/vimrcs/extended.vim
+"source ~/.vim_runtime/vimrcs/basic.vim
+"source ~/.vim_runtime/vimrcs/filetypes.vim
+"source ~/.vim_runtime/vimrcs/plugins_config.vim
+"source ~/.vim_runtime/vimrcs/extended.vim
 
 let mapleader = ","
 nmap <leader>ne :NERDTree<cr>
@@ -71,57 +125,11 @@ let g:indent_guides_auto_colors = 0
 "autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd  guibg=lightgrey ctermbg=lightgrey
 autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=darkgrey ctermbg=236
 
-let g:airline_theme='minimalist'
-let g:airline_powerline_fonts = 1
-let g:airline#extensions#tabline#enabled = 1
+"let g:airline_theme='minimalist'
+"let g:airline_powerline_fonts = 1
+"let g:airline#extensions#tabline#enabled = 1
+
 let g:vim_pbcopy_local_cmd = "pbcopy"
-
-" RSpec.vim mappings
- map <Leader>t :call RunCurrentSpecFile()<CR>
- map <Leader>s :call RunNearestSpec()<CR>
- map <Leader>l :call RunLastSpec()<CR>
- map <Leader>a :call RunAllSpecs()<CR>
- let g:rspec_command = "bundle exec rspec --default-path regression_specs --format d {spec}"
-
-" FZF color scheme updater from https://github.com/junegunn/fzf.vim/issues/59
-function! s:update_fzf_colors()
-  let rules =
-        \ { 'fg':      [['Normal',       'fg']],
-        \ 'bg':      [['Normal',       'bg']],
-        \ 'hl':      [['String',       'fg']],
-        \ 'fg+':     [['CursorColumn', 'fg'], ['Normal', 'fg']],
-        \ 'bg+':     [['CursorColumn', 'bg']],
-        \ 'hl+':     [['String',       'fg']],
-        \ 'info':    [['PreProc',      'fg']],
-        \ 'prompt':  [['Conditional',  'fg']],
-        \ 'pointer': [['Exception',    'fg']],
-        \ 'marker':  [['Keyword',      'fg']],
-        \ 'spinner': [['Label',        'fg']],
-        \ 'header':  [['Comment',      'fg']] }
-  let cols = []
-  for [name, pairs] in items(rules)
-    for pair in pairs
-      let code = synIDattr(synIDtrans(hlID(pair[0])), pair[1])
-      if !empty(name) && code != ''
-        call add(cols, name.':'.code)
-        break
-      endif
-    endfor
-  endfor
-  let s:orig_fzf_default_opts = get(s:, 'orig_fzf_default_opts', $FZF_DEFAULT_OPTS)
-  let $FZF_DEFAULT_OPTS = s:orig_fzf_default_opts .
-        \ (empty(cols) ? '' : (' --color='.join(cols, ',')))
-endfunction
-
-augroup _fzf
-  autocmd!
-  autocmd VimEnter,ColorScheme * call <sid>update_fzf_colors()
-augroup END
-
-if executable('ag')
-  let g:ackprg = 'ag --vimgrep'
-endif
-
 
 set encoding=utf-8
 
@@ -133,22 +141,50 @@ set expandtab
 set autoindent
 set smarttab
 
+" Open folds by default
+set nofoldenable
+
 set hlsearch
-set ruler
+"set ruler
 set showmatch
 
+" allow Delete key in VIM in insert mode
+:set bs=2
+
 set linebreak               " Break long lines by word, not char
-"set list                    " Show whitespace as special chars - see listchars
 set matchtime=2             " Tenths of second to hilight matching paren
-
-"silent! set mouse=nvc       " Use the mouse, but not in insert mode
-set scrolloff=10            " Keep cursor away from this many chars top/bot
-
+set scrolloff=4             " Keep cursor away from this many chars top/bot
 set shiftround              " Shift to certain columns, not just n spaces
 set shortmess+=A            " Don't bother me when a swapfile exists
 
 " Trim spaces at EOL and retab. I run `:CLEAN` a lot to clean up files.
 command! TEOL %s/\s\+$//
 command! CLEAN retab | TEOL
-command! VO ! vim $(fzf)
+command! O ! vim $(fzf)
+
+" Mix Compile
+command! MC ! mix compile
+
+" Mix Format on save
+let g:mix_format_on_save = 1
+let g:mix_format_silent_errors = 1
+
+" Python Specific
+let g:python_highlight_all = 1
+let g:pymode_python = 'python3'
+
+"let g:pymode_python = 'python3' The first line ensures that the auto-complete window goes away when you’re done with it, and the second defines a shortcut for goto definition.
+let g:ycm_autoclose_preview_window_after_completion=1
+map <leader>g  :YcmCompleter GoToDefinitionElseDeclaration<CR>
+let NERDTreeIgnore=['\.pyc$', '\~$'] "ignore files in NERDTree
+
+" PEP-8 
+au BufNewFile,BufRead *.py
+    \ set tabstop=4 |
+    \ set softtabstop=4 |
+    \ set shiftwidth=4 |
+    \ set textwidth=79 |
+    \ set expandtab |
+    \ set autoindent |
+    \ set fileformat=unix
 

@@ -3,18 +3,29 @@
 alias kpw='watch_pods'
 function watch_pods() {
   if [ -z "$1" ]; then
-    watch kubectl get pods -a
+    watch kubectl get pods
   else
-    watch "kubectl get pods -a | grep $1"
+    watch "kubectl get pods | grep $1"
   fi
 }
 alias kp='get_pods'
 function get_pods() {
   if [ -z "$1" ]; then
+    kubectl get pods
+  else
+    kubectl get pods | grep $1
+  fi
+}
+alias kpa='get_pods_all'
+function get_pods_all() {
+  if [ -z "$1" ]; then
     kubectl get pods -a
   else
     kubectl get pods -a | grep $1
   fi
+}
+function kpc () {
+  kubectl get pods -a | grep image-builder-$1 | grep -i 'm$' | grep Running
 }
 alias k="kubectl"
 alias kbp='kube_build_push'
@@ -27,7 +38,7 @@ alias kl='kube_command log'
 ##############################################################
 #  Build/Push
 #############################################################
-# - This will take the current directory you are running this 
+# - This will take the current directory you are running this
 #   command and use that directory name as the app name
 # - There is one optional parameter that will default to 'latest'
 #

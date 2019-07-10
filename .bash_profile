@@ -3,9 +3,19 @@ source ~/.salesloft
 source ~/.secrets
 #source ~/.k8s_qa_commands
 source ~/.k8s_hydra2_commands
+source ~/.rsync
+export PATH="/User/briansmith/scripts:$PATH"
 
 export EDITOR='vim'
+alias vim="/usr/local/Homebrew/Cellar/vim/8.1.1550/bin/vim"
+alias cim="/usr/local/Homebrew/Cellar/vim/8.1.1550/bin/vim"
 eval "$(nodenv init -)"
+alias vimrc="vim ~/.vimrc"
+alias cat="bat"
+alias python="python3"
+
+# pass aliases to watch
+alias watch='watch '
 
 alias f1="awk '{print \$1}'"
 alias f2="awk '{print \$2}'"
@@ -13,8 +23,12 @@ alias f3="awk '{print \$3}'"
 
 alias g="grep"
 alias h="heroku"
+alias hl="heroku logs --tail"
+alias hp="git push heroku master && heroku logs --tail"
 alias k="kubectl"
 alias mc="mix compile"
+
+source <(k completion bash)
 
 #alias vo='vim $(fzf)'
 alias vo='vim $(fzf --height 40%)'
@@ -26,10 +40,6 @@ alias rm='rm -i'
 alias cp='cp -i'
 alias mv='mv -i'
 alias clean='cd ~/Library/Caches/;sudo rm -rf ~/Library/Caches/*;cd /private/var/tmp/;sudo rm -rf TM*;sudo rm -rf /private/var/folders/;Sudo rm -rf /private/var/log/*;cd ~'
-alias ..='cd ..'
-alias ...='cd ../..'
-alias ....='cd ../../..'
-alias .....='cd ../../../..'
 alias path='echo -e ${PATH//:/\\n}'
 
 alias r='rake'
@@ -38,7 +48,7 @@ alias mem='top -o rsize'
 alias rbash=". ~/.bash_profile"
 
 # Testing
-alias irb='irb --simple-prompt'
+alias irb='ruby -S irb --simple-prompt'
 alias be='bundle exec'
 alias ber='bundle exec rake'
 alias bes='bundle exec foreman start'
@@ -81,6 +91,18 @@ export PATH="/usr/local/Homebrew/opt/elasticsearch@5.6/bin:$PATH"
 
 #ErlangInstaller
 export PATH="~/.erlangInstaller/default/bin:$PATH"export PATH="/usr/local/Homebrew/opt/erlang@20/bin:$PATH"
-
 # Don't expand tilde override for bash_completion
 function _expand() { :;}
+export PATH="/usr/local/Homebrew/opt/postgresql@9.6/bin:$PATH"
+
+export ERL_AFLAGS="-kernel shell_history enabled"
+export GOPATH="/Users/briansmith/src/go"
+export PATH=$PATH:$(go env GOPATH)/bin
+export PATH="/usr/local/Homebrew/opt/postgresql@10/bin:$PATH"
+
+# For compilers to find zlib you may need to set:
+export LDFLAGS="${LDFLAGS} -L/usr/local/opt/zlib/lib"
+export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/zlib/include"
+
+# For pkg-config to find zlib you may need to set:
+export PKG_CONFIG_PATH="${PKG_CONFIG_PATH} /usr/local/opt/zlib/lib/pkgconfig"
