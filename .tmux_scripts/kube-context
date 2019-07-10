@@ -1,0 +1,5 @@
+#! /bin/bash
+context=$(cat $HOME/.kube/config | grep "current-context:" | sed "s/current-context: //")
+if [ -n "$context" ]; then
+  echo "#[fg=colour81]${context}#[default]"
+fi

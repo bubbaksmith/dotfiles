@@ -1,0 +1,14 @@
+#! /bin/bash
+pane_dir=$(tmux display-message -p -F "#{pane_current_path}")
+branch=$(cd $pane_dir; git symbolic-ref HEAD 2>/dev/null | cut -d"/" -f 3)
+dirty=$(cd $pane_dir; git status --porcelain --untracked-files=no)
+
+if [ -n "$dirty" ]; then
+  color="yellow"
+else
+  color="white"
+fi
+
+if [ -n "$branch" ]; then
+  echo "#[fg=${color}] ${branch}#[default]"
+fi
