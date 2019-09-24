@@ -1,6 +1,6 @@
 [user]
 	name = Brian Smith
-	email = brian.smith.keith@gmail.com
+	email = bubba@aol.com
 [core]
 	editor = vim
 	whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
@@ -33,23 +33,20 @@
 	prompt = false
 	trustExitCode = false
 [difftool]
-  prompt = false
+  	prompt = false
 [merge]
 	tool = diffmerge
 [mergetool "diffmerge"]
 	cmd = "diffmerge" --merge --result=$MERGED $LOCAL $BASE $REMOTE
 	trustExitCode = false
 [alias]
-  lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
-  co = checkout
-
+  	lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+  	co = checkout
 [hub]
-  protocol = https
-
+  	protocol = https
 [credential]
-  helper = /opt/boxen/bin/boxen-git-credential
-
+  	helper = /opt/boxen/bin/boxen-git-credential
 [core]
-  excludesfile = /opt/boxen/config/git/gitignore
+  	excludesfile = /opt/boxen/config/git/gitignore
 [grep]
 	lineNumber = true
