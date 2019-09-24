@@ -1,0 +1,116 @@
+#!/bin/bash
+source ~/.secrets
+
+function linter_reset () {
+  K8S_MANIFESTS="~/src/k8s-services-config-prod"
+  K8S_LINTER="~/src/k8s-linter"
+  rm -rf $K8S_MANIFESTS/tests
+  mkdir $K8S_MANIFESTS/tests
+  cp -a $K8S_LINTER/sl_k8s_linter/. $K8S_MANIFESTS/tests/ 
+  cd $K8S_MANIFESTS/tests
+}
+
+# Run the Linter
+function lint () {
+  linter_reset 
+  python -m pytest
+}
+
+# Testing
+function pylint () {
+  linter_reset
+  ipython
+}
+
+function k8s02 () {
+  connect_vpn_sft
+  ssh k8s02
+}
+function k8s04 () {
+  connect_vpn_sft
+    ssh k8s04
+}
+function connect_vpn_sft () {
+  vpn_connected=$(netstat -i | grep $SALESLOFT_VPN_IP)
+  while [[ -z $vpn_connected ]]; do
+    networksetup -connectpppoeservice 'SalesLoftVPN'
+    sleep 1
+    vpn_connected=$(netstat -i | grep $SALESLOFT_VPN_IP)
+  done
+  echo "VPN Connected..."
+  sft_login=$(sft login | grep 'Session expires in')
+  if [[ ! -z $sft_login ]]; then
+    sft login
+  fi
+}
+
+# salesLoft
+alias omni="ssh-agent && ssh-add ~/.ssh/id_rsa; ssh -A briansmith@omni1.salesloft.com"
+alias vpn="networksetup -connectpppoeservice 'SalesLoftVPN'"
+alias melody="cd ~/src/melody && bundle install && bundle exec foreman start"
+alias kate="/Users/briansmith/src/k8s-utils/kate-cli/exe/kate"
+
+alias k2="kubectl -n region2"
+alias kt="kubectl -n tooling"
+
+alias qa="cd /Users/briansmith/src/k8s-services-config-qa"
+alias prod="cd /Users/briansmith/src/k8s-services-config-prod"
+alias prods="cd /Users/briansmith/src/k8s-services-sensitive-envs-prod"
+
+
+alias set-kops-qa='export {NAME,CLUSTER_NAME}=cluster1.kubernetes-qa.qasalesloft.com; export KOPS_STATE_STORE=s3://salesloft-kops-qa'
+
+#function 1pass () {
+  #eval $(op signin salesloft)
+#}
+
+function treq () {
+  cd ~/src/devops_tooling/snowflake
+  docker build . -t registry.qasalesloft.com/techops-requests:latest
+  docker push registry.qasalesloft.com/techops-requests:latest
+  kubectl get pods -n tooling | grep techops-req | awk '{print $1}' | xargs kubectl -n tooling delete pod
+  echo "Sleeping ..."
+  sleep 1
+  echo "Sleeping ..."
+  sleep 1
+  echo "Sleeping ..."
+  sleep 1
+  echo "Sleeping ..."
+  sleep 1
+  echo "Sleeping ..."
+  sleep 1
+
+  kubectl -n tooling get pods | grep techops-req | awk '{print $1}' | xargs kubectl -n tooling logs -f
+}
+
+function trl () {
+  POD=$(kubectl -n tooling get pods | grep techops-req | awk '{print $1}')
+  echo "pod found: ${POD}"
+  kubectl -n tooling logs -f $POD
+}
+
+function tre () {
+  POD=$(kubectl -n tooling get pods | grep techops-req | awk '{print $1}')
+  kubectl -n tooling exec -it $POD bash
+}
+
+function update () { 
+  npm install
+  npm run build
+  bundle install
+  bin/rake db:migrate RAILS_ENV=test
+  bin/rake db:migrate RAILS_ENV=development
+}
+
+function qa () {
+  QA_NUM=$1
+  echo "connecting to Melody QA${QA_NUM}..."
+
+  if [ "${QA_NUM}" = "1" ] || [ "${QA_NUM}" = "2" ]; then
+    ssh -t qa$QA_NUM "sudo su - deploy -c 'cd /srv/www/melody_qa/current; bash'"
+  else
+    POD_NAME=$(kubectl get pods | grep -E "^melody-qa${QA_NUM}-[a-z0-9]{9,10}-[a-z0-9]{5}" | awk '{print $1}')
+    echo "found POD name: ${POD_NAME}..."
+    kubectl exec -it $POD_NAME bash
+  fi
+}
