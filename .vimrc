@@ -23,7 +23,7 @@ Plugin 'mhinz/vim-mix-format'
 Plugin 'scrooloose/nerdtree'
 Plugin 'vim-python/python-syntax'
 "Plugin 'ajh17/VimCompletesMe'
-Plugin 'Valloric/YouCompleteMe'
+"Plugin 'Valloric/YouCompleteMe'
 Plugin 'vim-syntastic/syntastic'
 Plugin 'kien/ctrlp.vim'
 
@@ -172,6 +172,10 @@ let g:mix_format_silent_errors = 1
 " Python Specific
 let g:python_highlight_all = 1
 let g:pymode_python = 'python3'
+let g:syntastic_python_checkers = ['python3']
+let g:syntastic_python_flake8_exec = 'python3'
+let g:syntastic_python_flake8_args = ['-m', 'flake8']
+
 
 "let g:pymode_python = 'python3' The first line ensures that the auto-complete window goes away when you’re done with it, and the second defines a shortcut for goto definition.
 let g:ycm_autoclose_preview_window_after_completion=1
@@ -183,8 +187,7 @@ au BufNewFile,BufRead *.py
     \ set tabstop=4 |
     \ set softtabstop=4 |
     \ set shiftwidth=4 |
-    \ set textwidth=79 |
     \ set expandtab |
-    \ set autoindent |
+    "\ set textwidth=79 |
     \ set fileformat=unix
 
