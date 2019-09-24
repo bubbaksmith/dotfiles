@@ -1,0 +1,22 @@
+#!/bin/bash
+
+alias git='sudo -E git'
+
+function kpw() {
+  watch "kubectl get pods | grep $1"
+}
+function kpwg() {
+  watch "kubectl -n global get pods | grep $1"
+}
+alias kp='kubectl get pods --all-namespaces | grep'
+function shas() {
+  kubectl get deployments -o wide -l salesloft-app=$1 | awk '{printf "%40s %s\n", $1, $8}'
+}
+alias pano='kubectl -n tooling get pods | grep pano | grep -v build | grep -v worker'
+alias node='kubectl get nodes -o custom-columns=NAME:.metadata.name,HOSTID:.spec.providerID | grep'
+function node_info() {
+  echo "Searching for ${1}..."
+  NODE_NAME=$(kubectl get nodes -o custom-columns=NAME:.metadata.name,HOSTID:.spec.providerID | grep $1 | awk '{print $1}')
+  echo "Found Node: ${NODE_NAME}..."
+  kubectl describe node $NODE_NAME
+}
