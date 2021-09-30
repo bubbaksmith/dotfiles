@@ -1,86 +1,114 @@
 #!/bin/bash
-source ~/.secrets
+source ~/.salesloft-clusters
 
-function linter_reset () {
-  K8S_MANIFESTS="~/src/k8s-services-config-prod"
-  K8S_LINTER="~/src/k8s-linter"
-  rm -rf $K8S_MANIFESTS/tests
-  mkdir $K8S_MANIFESTS/tests
-  cp -a $K8S_LINTER/sl_k8s_linter/. $K8S_MANIFESTS/tests/ 
-  cd $K8S_MANIFESTS/tests
-}
+export KUBECONFIG=~/.kube/config:~/.kube/gcp-config
 
-# Run the Linter
-function lint () {
-  linter_reset 
-  python -m pytest
-}
+# fixing Terraform
+export AWS_DEFAULT_REGION=us-east-1
 
-# Testing
-function pylint () {
-  linter_reset
-  ipython
-}
+# Tmuxinator
+alias us1="mux us1"
+alias us2="mux us2"
+alias prod="mux prod"
 
-function k8s02 () {
-  connect_vpn_sft
-  ssh k8s02
-}
-function k8s04 () {
-  connect_vpn_sft
-    ssh k8s04
-}
-function connect_vpn_sft () {
+function connect_salesloft_vpn () {
   vpn_connected=$(netstat -i | grep $SALESLOFT_VPN_IP)
   while [[ -z $vpn_connected ]]; do
-    networksetup -connectpppoeservice 'SalesLoftVPN'
+    networksetup -connectpppoeservice 'SalesLoft VPN'
     sleep 1
     vpn_connected=$(netstat -i | grep $SALESLOFT_VPN_IP)
   done
   echo "VPN Connected..."
+}
+
+function connect_sft () {
   sft_login=$(sft login | grep 'Session expires in')
   if [[ ! -z $sft_login ]]; then
     sft login
   fi
 }
 
+function connect_vpn_sft () {
+  connect_salesloft_vpn
+  connect_sft
+}
+
 # salesLoft
-alias omni="ssh-agent && ssh-add ~/.ssh/id_rsa; ssh -A briansmith@omni1.salesloft.com"
 alias vpn="networksetup -connectpppoeservice 'SalesLoftVPN'"
-alias melody="cd ~/src/melody && bundle install && bundle exec foreman start"
 alias kate="/Users/briansmith/src/k8s-utils/kate-cli/exe/kate"
 
-alias k2="kubectl -n region2"
 alias kt="kubectl -n tooling"
 
-alias qa="cd /Users/briansmith/src/k8s-services-config-qa"
-alias prod="cd /Users/briansmith/src/k8s-services-config-prod"
-alias prods="cd /Users/briansmith/src/k8s-services-sensitive-envs-prod"
-
-
 alias set-kops-qa='export {NAME,CLUSTER_NAME}=cluster1.kubernetes-qa.qasalesloft.com; export KOPS_STATE_STORE=s3://salesloft-kops-qa'
+alias set-kops-hydra='export NAME=hydra2; export CLUSTER_NAME=cluster1.k8s-hydra2.qasalesloft.com; export KOPS_STATE_STORE=s3://salesloft-kops-hydra2'
 
-#function 1pass () {
-  #eval $(op signin salesloft)
-#}
+alias taints="kubectl get nodes -o json | jq -c '.items[]| select(.spec.taints!='null') | .metadata.name, .spec.taints'"
+
+function five_seconds_sleep () {
+  echo "Sleeping ..."
+  sleep 1
+  echo "Sleeping ..."
+  sleep 1
+  echo "Sleeping ..."
+  sleep 1
+  echo "Sleeping ..."
+  sleep 1
+  echo "Sleeping ..."
+  sleep 1
+}
+
+function twil() {
+  cd ~/src/devops_tooling/twilio_logstash_middleware
+  docker build . -t registry.qasalesloft.com/twilio_middleware:latest
+  docker push registry.qasalesloft.com/twilio_middleware:latest
+  kubectl -n tooling get pods | grep twilio-logstash-middleware | awk '{print $1}' | xargs kubectl -n tooling delete pod
+  five_seconds_sleep
+  kubectl -n tooling get pods | grep twilio-logstash-middleware | awk '{print $1}' | xargs kubectl -n tooling logs -f
+}
+
+function r4r () {
+  cd ~/src/devops_tooling/k8s-prod-pr-notification
+  docker build . -t registry.qasalesloft.com/ready4review:latest
+  docker push registry.qasalesloft.com/ready4review:latest
+  kubectl -n tooling get pods | grep ready | f1 | xargs kubectl -n tooling delete pod
+  five_seconds_sleep
+  kubectl -n tooling get pods | grep ready | awk '{print $1}' | xargs kubectl -n tooling logs -f
+}
 
 function treq () {
-  cd ~/src/devops_tooling/snowflake
+  cd ~/src/devops_tooling/techops-requests-bot
   docker build . -t registry.qasalesloft.com/techops-requests:latest
   docker push registry.qasalesloft.com/techops-requests:latest
   kubectl get pods -n tooling | grep techops-req | awk '{print $1}' | xargs kubectl -n tooling delete pod
-  echo "Sleeping ..."
-  sleep 1
-  echo "Sleeping ..."
-  sleep 1
-  echo "Sleeping ..."
-  sleep 1
-  echo "Sleeping ..."
-  sleep 1
-  echo "Sleeping ..."
-  sleep 1
-
+  five_seconds_sleep
   kubectl -n tooling get pods | grep techops-req | awk '{print $1}' | xargs kubectl -n tooling logs -f
+
+}
+
+function toblog () {
+  cd ~/src/devops_tooling/techops-changelog/
+  docker build . -t registry.qasalesloft.com/techops-changelog:latest
+  docker push registry.qasalesloft.com/techops-changelog:latest
+  kubectl get pods -n tooling | grep techops-changelog | awk '{print $1}' | xargs kubectl -n tooling delete pod
+  five_seconds_sleep
+  pod_found=$(kubectl -n tooling get pods | grep techops-changelog | grep -v Termin | awk '{print $1}')
+  echo "Pod Found: ${pod_found}"
+  kubectl -n tooling logs -f $pod_found
+}
+
+function autoassign () {
+  cd ~/src/devops_tooling/jira_autoassign/
+  docker build . -t registry.qasalesloft.com/autoassign:latest
+  docker push registry.qasalesloft.com/autoassign:latest
+  kubectl get pods | grep autoass | awk '{print $1}' | xargs kubectl delete pod
+  five_seconds_sleep
+  kubectl get pods | grep autoass | grep Running | awk '{print $1}' | xargs kubectl logs -f
+}
+
+function tobl () {
+  POD=$(kubectl -n tooling get pods | grep techops-change| grep Running | awk '{print $1}')
+  echo "pod found: ${POD}"
+  kubectl -n tooling logs -f $POD
 }
 
 function trl () {
@@ -94,23 +122,24 @@ function tre () {
   kubectl -n tooling exec -it $POD bash
 }
 
-function update () { 
-  npm install
-  npm run build
-  bundle install
-  bin/rake db:migrate RAILS_ENV=test
-  bin/rake db:migrate RAILS_ENV=development
+alias "gcp-qa"="kubectl config use-context gke_salesloft-qa-252014_us-central1_qa-cluster-2"
+
+function gcp_enc () {
+  echo "gcp encoding!"
+  cat $1 | gcloud kms encrypt --project salesloft-qa-252014 --location us-central1 --key kafka-certs-key --keyring kafka-qa-certs --plaintext-file - --ciphertext-file - | base64 | tee encrypted/$1.encrypted
 }
 
-function qa () {
-  QA_NUM=$1
-  echo "connecting to Melody QA${QA_NUM}..."
+vsc() {  #view-secret-commit
+    git switch master
+    git pull
+    git switch $1
+    for file in $(git diff-tree --no-commit-id --name-only -r head)
+    do
+        sops -d $file
+        echo =======
+    done
+}
 
-  if [ "${QA_NUM}" = "1" ] || [ "${QA_NUM}" = "2" ]; then
-    ssh -t qa$QA_NUM "sudo su - deploy -c 'cd /srv/www/melody_qa/current; bash'"
-  else
-    POD_NAME=$(kubectl get pods | grep -E "^melody-qa${QA_NUM}-[a-z0-9]{9,10}-[a-z0-9]{5}" | awk '{print $1}')
-    echo "found POD name: ${POD_NAME}..."
-    kubectl exec -it $POD_NAME bash
-  fi
+function shas() {
+  kubectl get deployments --all-namespaces -o wide -l salesloft-app=$1 | awk '{printf "%40s %s\n", $1, $8}'
 }

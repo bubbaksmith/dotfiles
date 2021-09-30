@@ -1,6 +1,9 @@
 set nocompatible              " be iMproved, required
 filetype off                  " required
 
+" dont judge me
+set mouse=a
+
 set laststatus=0
 
 " set the runtime path to include Vundle and initialie
@@ -9,28 +12,35 @@ call vundle#begin()
 
 Plugin 'dikiaap/minimalist'
 Plugin 'VundleVim/Vundle.vim'
-Plugin 'tpope/vim-fugitive'
-Plugin 'slashmili/alchemist.vim'
-"Plugin 'tarekbecker/vim-yaml-formatter'
 Plugin 'mrk21/yaml-vim'
 Plugin 'scrooloose/nerdcommenter'
-Plugin 'nathanaelkane/vim-indent-guides'
-Plugin 'mileszs/ack.vim'
-Plugin 'ryanoasis/vim-devicons'
-Plugin 'tiagofumo/vim-nerdtree-syntax-highlight'
-Plugin 'christoomey/vim-conflicted'
-Plugin 'mhinz/vim-mix-format'
 Plugin 'scrooloose/nerdtree'
-Plugin 'vim-python/python-syntax'
-"Plugin 'ajh17/VimCompletesMe'
-"Plugin 'Valloric/YouCompleteMe'
-Plugin 'vim-syntastic/syntastic'
-Plugin 'kien/ctrlp.vim'
+Plugin 'ajh17/VimCompletesMe'
+
+" 2020
+Plugin 'svermeulen/vim-easyclip'
+Plugin 'sheerun/vim-polyglot'
+Plugin 'ctrlpvim/ctrlp.vim'
+Plugin 'wikitopian/hardmode'
+
+" 2021
+Plugin 'pearofducks/ansible-vim'
 
 " Python
-Plugin 'vim-scripts/indentpython.vim'
-Plugin 'nvie/vim-flake8'
+Plugin 'psf/black'
+Plugin 'hashivim/vim-terraform'
+"Plugin 'tell-k/vim-autopep8'
 
+
+set rtp+=/usr/local/opt/fzf
+
+set backupdir=~/.tmp
+set directory=~/.tmp
+
+"Undoing
+set undofile
+set undodir=~/.vim/undodir
+set undolevels=5000
 
 
 " " All of your Plugins must be added before the following line
@@ -81,25 +91,7 @@ augroup BWCCreateDir
   autocmd BufWritePre * :call s:MkNonExDir(expand('<afile>'), +expand('<abuf>'))
 augroup END
 
-"Trackpad Scrolling
-set mouse=a
-
-" MultiCursor setting of values
-let g:multi_cursor_use_default_mapping=0
-let g:multi_cursor_start_word_key      = '<C-n>'
-let g:multi_cursor_select_all_word_key = '<A-n>'
-let g:multi_cursor_start_key           = 'g<C-n>'
-let g:multi_cursor_select_all_key      = 'g<A-n>'
-let g:multi_cursor_next_key            = '<C-n>'
-let g:multi_cursor_prev_key            = '<C-p>'
-let g:multi_cursor_skip_key            = '<C-x>'
-let g:multi_cursor_quit_key            = '<Esc>'
-
-"source ~/.vim_runtime/vimrcs/basic.vim
-"source ~/.vim_runtime/vimrcs/filetypes.vim
-"source ~/.vim_runtime/vimrcs/plugins_config.vim
-"source ~/.vim_runtime/vimrcs/extended.vim
-
+" OG's. My home. You need this
 let mapleader = ","
 nmap <leader>ne :NERDTree<cr>
 nmap <leader>n :NERDTreeFind<CR>
@@ -107,16 +99,16 @@ nmap <leader>m :NERDTreeToggle<CR>
 
 " fzf
 set rtp+=/usr/local/opt/fzf
-nmap ; :Buffers<CR>
 nmap <Leader>t :Files<CR>
 nmap <Leader>r :Tags<CR>
 
 set number
-execute pathogen#infect()
+"execute pathogen#infect()
 
 set t_Co=256
 syntax on
 colorscheme minimalist
+let g:material_theme_style = 'default'
 
 " Indent Highlighting Variables
 let g:indent_guides_enable_on_vim_startup = 1
@@ -124,10 +116,6 @@ let g:indent_guides_color_change_percent = 50
 let g:indent_guides_auto_colors = 0
 "autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd  guibg=lightgrey ctermbg=lightgrey
 autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=darkgrey ctermbg=236
-
-"let g:airline_theme='minimalist'
-"let g:airline_powerline_fonts = 1
-"let g:airline#extensions#tabline#enabled = 1
 
 let g:vim_pbcopy_local_cmd = "pbcopy"
 
@@ -138,8 +126,6 @@ set tabstop=2
 set shiftwidth=2
 set softtabstop=2
 set expandtab
-set autoindent
-set smarttab
 
 " Open folds by default
 set nofoldenable
@@ -161,13 +147,7 @@ set shortmess+=A            " Don't bother me when a swapfile exists
 command! TEOL %s/\s\+$//
 command! CLEAN retab | TEOL
 command! O ! vim $(fzf)
-
-" Mix Compile
-command! MC ! mix compile
-
-" Mix Format on save
-let g:mix_format_on_save = 1
-let g:mix_format_silent_errors = 1
+command! PYTAB :%s/^I/    /
 
 " Python Specific
 let g:python_highlight_all = 1
@@ -182,12 +162,40 @@ let g:ycm_autoclose_preview_window_after_completion=1
 map <leader>g  :YcmCompleter GoToDefinitionElseDeclaration<CR>
 let NERDTreeIgnore=['\.pyc$', '\~$'] "ignore files in NERDTree
 
-" PEP-8 
+" PEP-8
 au BufNewFile,BufRead *.py
-    \ set tabstop=4 |
-    \ set softtabstop=4 |
-    \ set shiftwidth=4 |
-    \ set expandtab |
-    "\ set textwidth=79 |
-    \ set fileformat=unix
+  \ set tabstop=4 |
+  \ set softtabstop=4 |
+  \ set shiftwidth=4 |
+  \ set expandtab |
+  \ set fileformat=unix
 
+" AutoRun Black on Write
+"autocmd BufWritePre *.py execute ':Black'
+
+" Vim Hardmode
+let g:HardMode_level = 'wannabe'
+let g:HardMode_hardmodeMsg = 'Don''t use this!'
+autocmd VimEnter,BufNewFile,BufReadPost * silent! call HardMode()
+
+" Disable Arrow Keys
+augroup SeriouslyNoInsertArrows
+  autocmd!
+  autocmd InsertEnter * inoremap <expr> <Up> pumvisible() ? "\<C-P>" : ""
+  autocmd InsertEnter * inoremap <expr> <Down> pumvisible() ? "\<C-N>" : ""
+augroup END
+
+" AutoFormat Terraform Code
+let g:terraform_fmt_on_save=1
+
+" Auto PEP8 formatting
+"let g:autopep8_on_save = 1
+
+" Strip all trailing whitespace from files on save
+autocmd BufWritePre * :%s/\s\+$//e
+
+" Ansible
+au BufRead,BufNewFile */ansible/*.yml set filetype=yaml.ansible
+
+" Add Python headers to files
+autocmd BufNewFile *.py 0put =\"#!/usr/bin/env python\<nl>\# -*- coding: utf-8 -*-\<nl>\<nl>\"|$
