@@ -26,22 +26,14 @@ Plugin 'wikitopian/hardmode'
 " 2021
 Plugin 'pearofducks/ansible-vim'
 
+" 2022
+Plugin 'nathanaelkane/vim-indent-guides'
+Plugin 'srcery-colors/srcery-vim'
+
 " Python
 Plugin 'psf/black'
 Plugin 'hashivim/vim-terraform'
 "Plugin 'tell-k/vim-autopep8'
-
-
-set rtp+=/usr/local/opt/fzf
-
-set backupdir=~/.tmp
-set directory=~/.tmp
-
-"Undoing
-set undofile
-set undodir=~/.vim/undodir
-set undolevels=5000
-
 
 " " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -56,6 +48,15 @@ filetype plugin indent on    " require"
 " " see :h vundle for more details or wiki for FAQ
 " " Put your non-Plugin stuff after this line
 
+set rtp+=/usr/local/opt/fzf
+
+set backupdir=~/.tmp
+set directory=~/.tmp
+
+"Undoing
+set undofile
+set undodir=~/.vim/undodir
+set undolevels=5000
 " open a NERDTree automatically when vim starts up if no files were specified
 autocmd StdinReadPre * let s:std_in=1
 autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
@@ -107,6 +108,7 @@ set number
 
 set t_Co=256
 syntax on
+colorscheme srcery
 colorscheme minimalist
 let g:material_theme_style = 'default'
 

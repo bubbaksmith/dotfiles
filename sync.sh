@@ -11,3 +11,5 @@ yes | cp -rf ~/.vimrc ~/src/dotfiles/.vimrc
 
 yes | cp -rf ~/.tmux.conf ~/src/dotfiles/.tmux.conf
 yes | cp -rf ~/.tmux_scripts/. ~/src/dotfiles/.tmux_scripts
+
+yes | cp -rf ~/.config/nvim/init.vim ~/src/dotfiles/.config/nvim/init.vim

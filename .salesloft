@@ -1,7 +1,9 @@
 #!/bin/bash
 source ~/.salesloft-clusters
 
-export KUBECONFIG=~/.kube/config:~/.kube/gcp-config
+export KUBECONFIG=~/.kube/config:~/.kube/gcp-config:~/.kube/datascience-config
+
+alias sls="sft list-servers | grep -i"
 
 # fixing Terraform
 export AWS_DEFAULT_REGION=us-east-1
@@ -35,12 +37,12 @@ function connect_vpn_sft () {
 
 # salesLoft
 alias vpn="networksetup -connectpppoeservice 'SalesLoftVPN'"
-alias kate="/Users/briansmith/src/k8s-utils/kate-cli/exe/kate"
 
 alias kt="kubectl -n tooling"
 
 alias set-kops-qa='export {NAME,CLUSTER_NAME}=cluster1.kubernetes-qa.qasalesloft.com; export KOPS_STATE_STORE=s3://salesloft-kops-qa'
 alias set-kops-hydra='export NAME=hydra2; export CLUSTER_NAME=cluster1.k8s-hydra2.qasalesloft.com; export KOPS_STATE_STORE=s3://salesloft-kops-hydra2'
+alias set-kops-dev='export {NAME,CLUSTER_NAME}=cluster1.k8s-dev01.devsalesloft.com; export KOPS_STATE_STORE=s3://salesloft-kops-dev'
 
 alias taints="kubectl get nodes -o json | jq -c '.items[]| select(.spec.taints!='null') | .metadata.name, .spec.taints'"
 
@@ -55,6 +57,38 @@ function five_seconds_sleep () {
   sleep 1
   echo "Sleeping ..."
   sleep 1
+}
+
+function seconds_sleep () {
+  local num_sleep=$1
+  for ((i=0; i<$num_sleep; i++))
+  do
+    echo "Sleeping ..."
+    sleep 1
+  done
+}
+
+function p8ndev () {
+  kubectl config use-context cluster1.k8s-dev01.devsalesloft.com
+  cd ~/src/panopticon
+  git_sha=$(git rev-parse HEAD)
+  docker build . -t registry.qasalesloft.com/panopticon:$git_sha
+  docker push registry.qasalesloft.com/panopticon:$git_sha
+  kubectl -n tooling set image deployments panopticon-listener listener=registry.qasalesloft.com/panopticon:$git_sha
+  kubectl -n tooling set image deployments panopticon-overseer overseer=registry.qasalesloft.com/panopticon:$git_sha
+  kubectl -n tooling set image deploy panopticon-inventory-builder inventory-builder=registry.qasalesloft.com/panopticon:$git_sha
+  kubectl -n tooling get pods | grep panopticon | cut -d" " -f1 | xargs kubectl -n tooling delete pod
+  echo "registry.qasalesloft.com/panopticon:$git_sha"
+  stern -n tooling "panopticon-(over|invent)" --tail 0
+}
+
+function intranet() {
+  cd ~/src/intranet_slack_bot
+  docker build . -t registry.qasalesloft.com/intranet-slack-bot:master
+  docker push registry.qasalesloft.com/intranet-slack-bot:master
+  kubectl -n qa2 get pods | grep intranet | awk '{print $1}' | xargs kubectl -n qa2 delete pod
+  seconds_sleep 10
+  kubectl -n qa2 logs -f deploy/intranet-slack-bot
 }
 
 function twil() {
@@ -79,8 +113,8 @@ function treq () {
   cd ~/src/devops_tooling/techops-requests-bot
   docker build . -t registry.qasalesloft.com/techops-requests:latest
   docker push registry.qasalesloft.com/techops-requests:latest
-  kubectl get pods -n tooling | grep techops-req | awk '{print $1}' | xargs kubectl -n tooling delete pod
-  five_seconds_sleep
+  kubectl -n tooling rollout restart deploy techops-requests
+  seconds_sleep 10
   kubectl -n tooling get pods | grep techops-req | awk '{print $1}' | xargs kubectl -n tooling logs -f
 
 }
@@ -90,6 +124,7 @@ function toblog () {
   docker build . -t registry.qasalesloft.com/techops-changelog:latest
   docker push registry.qasalesloft.com/techops-changelog:latest
   kubectl get pods -n tooling | grep techops-changelog | awk '{print $1}' | xargs kubectl -n tooling delete pod
+  #seconds_sleep 5
   five_seconds_sleep
   pod_found=$(kubectl -n tooling get pods | grep techops-changelog | grep -v Termin | awk '{print $1}')
   echo "Pod Found: ${pod_found}"
@@ -122,7 +157,7 @@ function tre () {
   kubectl -n tooling exec -it $POD bash
 }
 
-alias "gcp-qa"="kubectl config use-context gke_salesloft-qa-252014_us-central1_qa-cluster-2"
+alias "gcp-qa"="kubectl config use-context gke_salesloft-qa-252014_us-central1_k8s-gcp-qa1"
 
 function gcp_enc () {
   echo "gcp encoding!"
@@ -130,14 +165,16 @@ function gcp_enc () {
 }
 
 vsc() {  #view-secret-commit
-    git switch master
-    git pull
-    git switch $1
-    for file in $(git diff-tree --no-commit-id --name-only -r head)
-    do
-        sops -d $file
-        echo =======
-    done
+  cd /Users/$(whoami)/src/k8s-services-sensitive-envs-prod-encrypted
+  git switch master
+  git pull
+  git switch $1
+  for file in $(git diff-tree --no-commit-id --name-only -r head)
+  do
+    sops -d $file
+    echo =======
+  done
+  cd -
 }
 
 function shas() {

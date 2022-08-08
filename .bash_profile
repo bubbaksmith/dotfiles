@@ -1,15 +1,16 @@
-# Catalina complainging about BASH
-export BASH_SILENCE_DEPRECATION_WARNING=1
-
 test -e "${HOME}/.iterm2_shell_integration.bash" && source "${HOME}/.iterm2_shell_integration.bash"
 iterm2_print_user_vars() {
   KUBECONTEXT=$(CTX=$(kubectl config current-context) 2> /dev/null;if [ $? -eq 0 ]; then echo $CTX;fi)
   iterm2_set_user_var kubeContext $KUBECONTEXT
 }
 
+alias vim='nvim'
+alias vimrc='nvim ~/.config/nvim/init.vim'
+
 source ~/.aliases
 source ~/.salesloft
 source ~/.secrets
+source ~/.kate
 export PATH="/User/briansmith/scripts:$PATH"
 
 # Put time in bash history
@@ -65,3 +66,20 @@ alias gst='git status -uno'
 
 # Prompt (Power Shell 1)
 export PS1="\n\[\033[38;5;178m\]\W \[$(tput bold)\]\[$(tput sgr0)\]\[\033[38;5;45m\]>\[$(tput sgr0)\]\[$(tput sgr0)\]\[\033[38;5;15m\] \[$(tput sgr0)\]"
+
+alias uuidgen='uuidgen | tr "[:upper:]" "[:lower:]"'
+
+# Created by `pipx` on 2021-11-16 16:04:44
+export PATH="$PATH:/Users/briansmith/.local/bin"
+
+source $(brew --prefix asdf)/asdf.sh
+source $(brew --prefix asdf)/etc/bash_completion.d/asdf.bash
+export PATH="/usr/local/opt/openssl@3/bin:$PATH"
+
+# Dont auto-update on brew install
+HOMEBREW_NO_AUTO_UPDATE=1
+
+# Github Commit signing
+export GPG_TTY=$(tty)
+
+source /usr/local/bin/load_aws_creds.sh
