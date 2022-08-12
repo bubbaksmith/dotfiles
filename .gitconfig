@@ -2,62 +2,54 @@
   name = Brian Smith
   email = brian.smith.keith@gmail.com
   signingkey = SUPERSEKRETKEY123456
+
 [core]
-  editor = vim
+  editor = nvim
   whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
   excludesfile = ~/.gitignore
+
 [web]
   browser = google-chrome
-[instaweb]
-  httpd = apache2 -f
+
 [push]
   default = simple
+
 [color]
   ui = auto
+
 [color "branch"]
   current = yellow bold
   local = green bold
   remote = cyan bold
+
 [color "diff"]
   meta = yellow bold
   frag = magenta bold
   old = red bold
   new = green bold
   whitespace = red reverse
+
 [color "status"]
   added = green
   changed = yellow
   untracked = cyan
 
-[difftool "diffmerge"]
-  cmd = "diffmerge.sh \"$LOCAL\" \"$REMOTE\""
-  prompt = false
-  trustExitCode = false
-[difftool]
-  prompt = false
-[merge]
-  tool = diffmerge
-[mergetool "diffmerge"]
-  cmd = "diffmerge" --merge --result=$MERGED $LOCAL $BASE $REMOTE
-  trustExitCode = false
 [alias]
   lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
   co = checkout
 
-[hub]
-  protocol = https
-
-[core]
-  excludesfile = /opt/boxen/config/git/gitignore
 [filter "lfs"]
   process = git-lfs filter-process
   required = true
   clean = git-lfs clean -- %f
   smudge = git-lfs smudge -- %f
+
 [pull]
   rebase = false
+
 [commit]
   template = /Users/briansmith/.git-commit-template
   gpgsign = true
+
 [tag]
   gpgSign = true

@@ -31,6 +31,7 @@ function connect_sft () {
 }
 
 function connect_vpn_sft () {
+  source ~/.bash_profile
   connect_salesloft_vpn
   connect_sft
 }
