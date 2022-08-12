@@ -1,3 +1,3 @@
 # dotfiles
 
-![image](https://user-images.githubusercontent.com/3159228/183471360-3f204145-2553-4129-897e-eb3acd3912e6.png)
+![image](https://user-images.githubusercontent.com/3159228/184395414-f925f106-0b50-467c-a9cd-821d59041d26.png)
