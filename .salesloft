@@ -2,6 +2,7 @@
 source ~/.salesloft-clusters
 
 export KUBECONFIG=~/.kube/config:~/.kube/gcp-config:~/.kube/datascience-config
+export ANSIBLE_HOST_KEY_CHECKING=false
 
 alias sls="sft list-servers | grep -i"
 
