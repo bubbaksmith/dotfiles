@@ -7,7 +7,7 @@ call plug#begin('~/.config/nvim/plugged')
 Plug 'joshdick/onedark.vim'
 Plug 'sheerun/vim-polyglot'
 "Plug 'Chiel92/vim-autoformat'
-"Plug 'scrooloose/nerdtree'
+Plug 'scrooloose/nerdtree'
 Plug 'scrooloose/nerdcommenter'
 "Plug 'terryma/vim-multiple-cursors'
 Plug 'mrk21/yaml-vim'
@@ -18,7 +18,7 @@ Plug 'mrk21/yaml-vim'
 " Python
 "Plug 'psf/black'
 Plug 'hashivim/vim-terraform'
-Plug 'davidhalter/jedi-vim'
+"Plug 'davidhalter/jedi-vim'
 
 " 2022
 Plug 'Shougo/neocomplete.vim'
@@ -26,12 +26,21 @@ Plug 'ervandew/supertab'
 Plug 'axelf4/vim-strip-trailing-whitespace'
 Plug 'chriskempson/base16-vim'
 Plug 'srcery-colors/srcery-vim'
+Plug 'ryanoasis/vim-devicons'
+
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+
+" 2023
+Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+
+" 2024
+Plug 'charlespascoe/vim-go-syntax'
 call plug#end()
 
 " set termguicolors
 set number
 colorscheme onedark
-" colorscheme srcery
 
 " Vim Jedi. Don't show autocompelte options after every dot
 let g:jedi#popup_on_dot = 0
@@ -59,6 +68,15 @@ au BufNewFile,BufRead *.py
   \ set expandtab |
   \ set fileformat=unix
 
+" GoLang
+au BufNewFile,BufRead *.go
+  \ set tabstop=4 |
+  \ set softtabstop=4 |
+  \ set shiftwidth=8 |
+  \ set expandtab |
+  \ set fileformat=unix
+
+
 " Strip all trailing whitespace from files on save
 " autocmd BufWritePre * :%s/\s\+$//e
 
@@ -72,7 +90,7 @@ autocmd BufNewFile *.py 0put =\"#!/usr/bin/env python\<nl>\# -*- coding: utf-8 -
 " autocmd BufWritePre *.py execute ':Black'
 
 " AutoFormat Terraform Code
-let g:terraform_fmt_on_save=0
+let g:terraform_fmt_on_save=1
 
 
 " More natural splits
@@ -80,8 +98,7 @@ set splitbelow          " Horizontal split below current.
 set splitright          " Vertical split to right of current.
 
 set mouse=a
-set list
-set ruler " Show the line and column numbers of the cursor.
+set ruler                       " Show the line and column numbers of the cursor.
 set noerrorbells                " No beeps
 set backspace=indent,eol,start  " Makes backspace key more powerful.
 set showcmd                     " Show me what I'm typing
@@ -118,9 +135,25 @@ augroup BWCCreateDir
   autocmd BufWritePre * :call s:MkNonExDir(expand('<afile>'), +expand('<abuf>'))
 augroup END
 
-"let g:python_host_skip_check = 1
-"let g:python3_host_skip_check = 1
 let g:python3_host_prog = '/Users/briansmith/.asdf/shims/python3'
 
 " Spell check some files
 autocmd FileType md,markdown setlocal spell
+
+" Remap d to be delete
+nnoremap x "_x
+nnoremap d "_d
+nnoremap D "_D
+vnoremap d "_d
+nnoremap <leader>d ""d
+nnoremap <leader>D ""D
+vnoremap <leader>d ""d
+
+let mapleader = ","
+nmap <leader>ne :NERDTree<cr>
+nmap <leader>n :NERDTreeFind<CR>
+nmap <leader>m :NERDTreeToggle<CR>
+
+" use Ag with ack.vim
+let g:ackprg = 'ag --nogroup --nocolor --column'
+let g:ag_working_path_mode="r" " search from project root and not cwd

@@ -1,9 +1,19 @@
+#!/bin/bash
+
 # kubectl context in the bottom iterm bar
-test -e "${HOME}/.iterm2_shell_integration.bash" && source "${HOME}/.iterm2_shell_integration.bash"
+# Swap profile if production
 iterm2_print_user_vars() {
-  KUBECONTEXT=$(CTX=$(kubectl config current-context) 2> /dev/null;if [ $? -eq 0 ]; then echo $CTX;fi)
-  iterm2_set_user_var kubeContext $KUBECONTEXT
+  export kube_context=$(kubectl config current-context 2>/dev/null)
+  iterm2_set_user_var kube_context $kube_context
+  if [ "$kube_context" = "cal-production" ] ; then
+    profile="Bubba-Prod-Shell"
+  else
+    profile="Bubba-Shell"
+  fi
+  echo -e "\033]50;SetProfile=$profile\a"
 }
+
+test -e "${HOME}/.iterm2_shell_integration.bash" && source "${HOME}/.iterm2_shell_integration.bash"
 
 # how I prefer to make witty comments in code
 export EDITOR='nvim'
@@ -11,25 +21,38 @@ alias vim='nvim'
 alias cim='nvim'
 alias vimrc='nvim ~/.config/nvim/init.vim'
 alias vo='nvim $(fzf --height 40%)'
+alias f='flyctl'
 
-# spit out some work specific things
-source ~/.aliases
-source ~/.salesloft
 source ~/.secrets
-source ~/.kate
-export PATH="/User/briansmith/scripts:$PATH"
+source ~/.calendly
+source ~/.cluster-lifecycle
 
 # now you know the exact time you messed up
 export HISTTIMEFORMAT="%d/%m/%y %T "
 
-# love and hate you
+# Hashicorp
 alias t="terraform"
+#alias v="vault"
+
+#alias r="rancher"
+alias c="clusteradm"
 
 # Kubernaughties
-source <(k completion bash)
+source <(kubectl completion bash)
 alias k="kubectl"
+#alias kk="kubectx"
+function kk () {
+  # kubectx but it adjusts its height to the number of contexts
+  # xargs is trimming whitespace here
+  numContexts=`kubectl config get-contexts --no-headers | wc -l | xargs`
+  height=$((numContexts + 1))
+  FZF_DEFAULT_OPTS="--info=hidden --height=$height" kubectx $@
+}
 complete -F __start_kubectl k
 complete -o default -F __start_kubectl k
+
+# Golang
+export GOPATH=$HOME/go
 
 # general quality of life improvements
 alias ll="/bin/ls -lhFG"
@@ -61,15 +84,31 @@ alias uuidgen='uuidgen | tr "[:upper:]" "[:lower:]"'
 export PATH="$PATH:/Users/briansmith/.local/bin"
 
 # asdf is life
-source $(brew --prefix asdf)/asdf.sh
-source $(brew --prefix asdf)/etc/bash_completion.d/asdf.bash
-export PATH="/usr/local/opt/openssl@3/bin:$PATH"
+. $HOME/.asdf/asdf.sh
+. $HOME/.asdf/completions/asdf.bash
 
 # Dont auto-update on brew install
 HOMEBREW_NO_AUTO_UPDATE=1
 
 # Github Commit signing
 export GPG_TTY=$(tty)
+eval "$(/opt/homebrew/bin/brew shellenv)"
 
-# Salesloft solution to AWS credentials rotation
-source /usr/local/bin/load_aws_creds.sh
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/bubba/Downloads/google-cloud-sdk/path.bash.inc' ]; then . '/Users/bubba/Downloads/google-cloud-sdk/path.bash.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/bubba/Downloads/google-cloud-sdk/completion.bash.inc' ]; then . '/Users/bubba/Downloads/google-cloud-sdk/completion.bash.inc'; fi
+
+if [ -f $(brew --prefix)/etc/bash_completion ]; then
+ . $(brew --prefix)/etc/bash_completion
+fi
+
+export PATH="/opt/homebrew/opt/postgresql@12/bin:$PATH"
+export PATH="~/go/bin:$PATH"
+
+### History
+# Avoid duplicates
+HISTCONTROL=ignoredups:erasedups
+# When the shell exits, append to the history file instead of overwriting it
+shopt -s histappend

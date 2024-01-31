@@ -1,6 +1,6 @@
 [user]
   name = Brian Smith
-  email = brian.smith.keith@gmail.com
+  email = bubba.smith@calendly.com
   signingkey = SUPERSEKRETKEY123456
 
 [core]
@@ -48,8 +48,11 @@
   rebase = false
 
 [commit]
-  template = /Users/briansmith/.git-commit-template
+  template = /Users/bubba/.git-commit-template
   gpgsign = true
 
 [tag]
   gpgSign = true
+
+[url "ssh://git@github.com/"]
+  insteadOf = https://github.com/
