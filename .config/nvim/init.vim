@@ -70,8 +70,8 @@ au BufNewFile,BufRead *.py
 
 " GoLang
 au BufNewFile,BufRead *.go
-  \ set tabstop=4 |
-  \ set softtabstop=4 |
+  \ set tabstop=8 |
+  \ set softtabstop=8 |
   \ set shiftwidth=8 |
   \ set expandtab |
   \ set fileformat=unix
